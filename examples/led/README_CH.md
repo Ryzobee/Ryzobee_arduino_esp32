@@ -5,5 +5,7 @@
 
 |名称|版本|介绍|
 |---|---|---|
-|  [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)  | >= v1.15.3 |Arduino library for controlling single-wire-based LED pixels and strip |
+|  [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)  | >= v1.15.3 |用于控制基于单线的LED像素和灯带的Arduino库 |
 
+
+fix(options): add a QIO 120Mhz Flash mode

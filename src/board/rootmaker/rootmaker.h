@@ -1,24 +1,42 @@
 #pragma once
 
 #include <LovyanGFX.hpp>
+#include <Wire.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+
 #include "rootmaker_pin.h"
 #include "lcd/Touch_CST816T.hpp"
 #include "lcd/Rootmaker_lcd.h"
 #include "led/Rootmaker_led.h"
 #include "button/Rootmaker_btn.h"
+#include "lis2dwtr/Rootmaker_Lis2dwtr.h"
 
 #define SCREEN_WIDTH  240
 
 class RootMaker {
+  private:
+    TwoWire _dev_i2c;
+    SemaphoreHandle_t _i2c_mutex;
+    bool _i2c_initialized;
+
   public:
     RootMaker(void);
+    ~RootMaker(void);
 
     void begin(bool LCDEnable      = true, 
                bool LEDEnable      = true, 
                bool SensorEnable   = true, 
                bool ButtonEnable   = true);
 
-    Rootmaker_Lcd lcd;  // 公开的 LCD 成员，用户通过 device.lcd 访问屏幕
-    Rootmaker_led led;  // 公开的 LED 成员，用户通过 device.led 访问 LED
-    Rootmaker_btn btn;  // 公开的按钮成员，用户通过 device.button 访问按钮
+    // 使用指针，在 begin() 中构造
+    Rootmaker_Lcd* lcd;
+    Rootmaker_led led;
+    Rootmaker_btn btn;
+    Rootmaker_lis2dwtr* lis2dwtr;
+
+    // I2C 资源锁接口
+    void lockI2C();
+    void unlockI2C();
+    TwoWire& getI2C() { return _dev_i2c; }
 };

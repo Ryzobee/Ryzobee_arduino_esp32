@@ -3,8 +3,6 @@
 #include <LovyanGFX.hpp>
 #include <Wire.h>
 
-
-
 namespace lgfx
 {
  inline namespace v1
@@ -17,19 +15,50 @@ namespace lgfx
 
   static constexpr uint8_t CST816S_SLEEP_IN   = 0x03;
 
+  // 使用 Arduino Wire 写寄存器
   bool Touch_CST816T::_write_reg(uint8_t reg, uint8_t val)
   {
-    return i2c::writeRegister8(_cfg.i2c_port, _cfg.i2c_addr, reg, val, 0, _cfg.freq).has_value();
+    if (_wire == nullptr) {
+      return false;
+    }
+    _wire->beginTransmission(_cfg.i2c_addr);
+    _wire->write(reg);
+    _wire->write(val);
+    return (_wire->endTransmission() == 0);
   }
 
+  // 使用 Arduino Wire 写多个字节
   bool Touch_CST816T::_write_regs(uint8_t* val, size_t length)
   {
-    return i2c::transactionWrite(_cfg.i2c_port, _cfg.i2c_addr, val, length, _cfg.freq).has_value();
+    if (_wire == nullptr) {
+      return false;
+    }
+    _wire->beginTransmission(_cfg.i2c_addr);
+    _wire->write(val, length);
+    return (_wire->endTransmission() == 0);
   }
 
+  // 使用 Arduino Wire 读寄存器
   bool Touch_CST816T::_read_reg(uint8_t reg, uint8_t *data, size_t length)
   {
-    return lgfx::i2c::transactionWriteRead(_cfg.i2c_port, _cfg.i2c_addr, &reg, 1, data, length, _cfg.freq).has_value();
+    if (_wire == nullptr) {
+      return false;
+    }
+    _wire->beginTransmission(_cfg.i2c_addr);
+    _wire->write(reg);
+    if (_wire->endTransmission(false) != 0) {
+      return false;
+    }
+    
+    size_t received = _wire->requestFrom((uint8_t)_cfg.i2c_addr, (size_t)length);
+    if (received != length) {
+      return false;
+    }
+    
+    for (size_t i = 0; i < length; i++) {
+      data[i] = _wire->read();
+    }
+    return true;
   }
 
   bool Touch_CST816T::_check_init(void)
@@ -38,33 +67,35 @@ namespace lgfx
 
     uint8_t tmp[3] = { 0 };
     _inited = _read_reg(CST816S_CHIPID_REG, tmp, 3);
-    ESP_LOGI("_inited:%02x", _inited);
     return _inited;
   }
 
 //----------------------------------------------------------------------------
   bool Touch_CST816T::init(void)
   {
-
-    // _check_init();
-
     _inited = false;
 
+    // 触摸屏复位
     if (_cfg.pin_rst >= 0)
     {
       lgfx::pinMode(_cfg.pin_rst, pin_mode_t::output);
       lgfx::gpio_lo(_cfg.pin_rst);
       lgfx::delay(10);
       lgfx::gpio_hi(_cfg.pin_rst);
-      lgfx::delay(10);
+      lgfx::delay(50);  // 给触摸屏更多时间启动
     }
 
+    // 配置中断引脚
     if (_cfg.pin_int >= 0)
     {
       lgfx::pinMode(_cfg.pin_int, pin_mode_t::input_pullup);
     }
-    lgfx::i2c::init(_cfg.i2c_port, _cfg.pin_sda, _cfg.pin_scl).has_value();
 
+    // 注意: 不再调用 lgfx::i2c::init()
+    // I2C 由外部 Wire 对象管理，避免驱动冲突
+    // Wire 应该在调用此 init() 之前已经初始化
+
+    _inited = true;
     return true;
   }
 
@@ -83,21 +114,30 @@ namespace lgfx
     if (!_inited) return;
   }
 
+  // 使用 Arduino Wire 读取触摸数据
   size_t Touch_CST816T::_read_data(uint8_t* readdata)
   {
+    if (_wire == nullptr) {
+      return 0;
+    }
+    
     size_t res = 0;
-    if (lgfx::i2c::beginTransaction(_cfg.i2c_port, _cfg.i2c_addr, _cfg.freq, false))
+    _wire->beginTransmission(_cfg.i2c_addr);
+    _wire->write(0x02);
+    if (_wire->endTransmission(false) == 0)
     {
-      readdata[0] = 0x02;
-      if (lgfx::i2c::writeBytes(_cfg.i2c_port, readdata, 1)
-      && lgfx::i2c::restart(_cfg.i2c_port, _cfg.i2c_addr, _cfg.freq, true)
-      && lgfx::i2c::readBytes(_cfg.i2c_port, readdata, 1))
+      if (_wire->requestFrom((uint8_t)_cfg.i2c_addr, (size_t)1) == 1)
       {
+        readdata[0] = _wire->read();
         uint_fast8_t points = std::min<uint_fast8_t>(max_touch_points, readdata[0] & 0x0Fu);
         if (points)
         {
-          if (lgfx::i2c::readBytes(_cfg.i2c_port, &readdata[1], points * 6 - 2))
+          size_t bytesToRead = points * 6 - 2;
+          if (_wire->requestFrom((uint8_t)_cfg.i2c_addr, bytesToRead) == bytesToRead)
           {
+            for (size_t i = 0; i < bytesToRead; i++) {
+              readdata[1 + i] = _wire->read();
+            }
             res = points * 6 - 1;
           }
         }
@@ -106,7 +146,6 @@ namespace lgfx
           res = 1;
         }
       }
-      lgfx::i2c::endTransaction(_cfg.i2c_port).has_value();
     }
     return res;
   }
@@ -120,7 +159,6 @@ namespace lgfx
     {
       return 0;
     }
-    
     
     uint8_t points = readdata[1];
     

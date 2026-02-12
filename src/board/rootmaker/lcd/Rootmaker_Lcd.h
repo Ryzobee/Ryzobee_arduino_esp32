@@ -1,7 +1,9 @@
 #pragma once
 
 #include <LovyanGFX.hpp>
-// #include "boards.h"
+#include <Wire.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "Touch_CST816T.hpp"
 
 #define LCD_WRITE_FREQ 40000000
@@ -19,17 +21,17 @@ class Rootmaker_Lcd : public lgfx::LGFX_Device {
     lgfx::Light_PWM     _light_instance;
   
     lgfx::Touch_CST816T _touch_instance;
+
+    TwoWire* _dev_i2c;
+    SemaphoreHandle_t _i2c_mutex;
   
   public:
-        Rootmaker_Lcd();
+        Rootmaker_Lcd(TwoWire& i2c, SemaphoreHandle_t mutex);
         void configure();  // 配置屏幕参数 (在构造函数中自动调用)
         void init();       // 初始化硬件 (需要在 setup() 中手动调用)
         void clear();
         lgfx::Panel_Device* panel() { return &_panel_instance; }
-        // void drawString(const char* str, int16_t x, int16_t y);
-        // void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-        // void drawCircle(int16_t x, int16_t y, int16_t r, uint16_t color);
-        // void drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
-        // void drawPixel(int16_t x, int16_t y, uint16_t color);
-        // void drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint16_t color);
+
+        // 带锁的触摸读取
+        bool getTouch(uint16_t* x, uint16_t* y);
 };

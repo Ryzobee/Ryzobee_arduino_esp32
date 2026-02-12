@@ -3,14 +3,14 @@
 #include "../rootmaker_pin.h"
 #include "Touch_CST816T.hpp"
 
-Rootmaker_Lcd::Rootmaker_Lcd(void) {
+Rootmaker_Lcd::Rootmaker_Lcd(TwoWire& i2c, SemaphoreHandle_t mutex) 
+    : _dev_i2c(&i2c), _i2c_mutex(mutex) {
     // 构造函数中只做配置, 不调用 init()
     // 实际初始化由用户在 setup() 中调用 init() 完成
     configure();
 }
 
 void Rootmaker_Lcd::configure(void) {
-    Serial.println("Rootmaker_Lcd::configure");
     {
         auto cfg = _bus_instance.config();    // Get the structure for bus configuration
 
@@ -74,6 +74,7 @@ void Rootmaker_Lcd::configure(void) {
         cfg.y_min      = 0;               // Minimum Y value from touch screen (raw value)
         cfg.y_max      = SCREEN_WIDTH;    // Maximum Y value from touch screen (raw value)
         cfg.pin_int    = TP_INT;          // Pin number connected to INT
+        cfg.pin_rst    = TP_RST;          // Pin number connected to RST
         cfg.bus_shared = true;            // Set to true if bus is shared with screen
         cfg.offset_rotation = 0;          // Adjustment value when display and touch orientation differ, set 0~7
     
@@ -85,6 +86,10 @@ void Rootmaker_Lcd::configure(void) {
         cfg.freq     = TP_FREQ;   // Set I2C clock frequency
     
         _touch_instance.config(cfg);
+        
+        // 将 Wire 对象传递给触摸屏驱动，使用统一的 I2C 驱动
+        _touch_instance.setWire(_dev_i2c);
+        
         _panel_instance.setTouch(&_touch_instance);  // Set the touch screen to the panel
     }
     
@@ -92,7 +97,21 @@ void Rootmaker_Lcd::configure(void) {
 }
 
 void Rootmaker_Lcd::init(void) {
-    Serial.println("Rootmaker_Lcd::init");
     // 调用父类的 init() 来真正初始化硬件
     lgfx::LGFX_Device::init();
+}
+
+bool Rootmaker_Lcd::getTouch(uint16_t* x, uint16_t* y) {
+    bool touched = false;
+    if (xSemaphoreTake(_i2c_mutex, portMAX_DELAY) == pdTRUE) {
+        lgfx::touch_point_t tp;
+        int count = lgfx::LGFX_Device::getTouch(&tp, 1);
+        if (count > 0) {
+            *x = tp.x;
+            *y = tp.y;
+            touched = true;
+        }
+        xSemaphoreGive(_i2c_mutex);
+    }
+    return touched;
 }
