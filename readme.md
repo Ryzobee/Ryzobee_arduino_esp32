@@ -1,5 +1,7 @@
 # Ryzobee Arduino ESP32
 
+[中文版本](./README_CN.md)
+
 This repository provides Arduino support library for Ryzobee series development boards, making the development process faster and more efficient.
 
 ## Quick Start
