@@ -12,6 +12,10 @@
 #define SDA      41
 #define SCL      40
 
+// PY32 I2C
+#define I2C_SDA  41
+#define I2C_SCL  40
+
 // LCD
 #define LCD_SDA  9
 #define LCD_BL   7
@@ -37,7 +41,7 @@
 // BTN
 #define BTN_PIN 0
 
-// 4个扩展接口
+// 4 expansion interfaces
 #define PORT1_SDA  15
 #define PORT1_SCL  16
 

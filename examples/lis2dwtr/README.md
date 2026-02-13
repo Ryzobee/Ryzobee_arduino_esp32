@@ -1,4 +1,7 @@
 # Install dependencies
+
+[中文](./README.md)
+
 This routine relies on the Lis2dw12 library, which needs to be downloaded on the Arduino IDE
 
 # Dependencies

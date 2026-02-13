@@ -1,4 +1,6 @@
 # 下载依赖库
+
+[English](./README_CN.md)
 此程序依赖于Adafruit_NeoPixel库，该库需要在ArduinoIDE中下载
 
 # 依赖库

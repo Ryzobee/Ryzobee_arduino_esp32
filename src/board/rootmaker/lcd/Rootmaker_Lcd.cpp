@@ -5,8 +5,6 @@
 
 Rootmaker_Lcd::Rootmaker_Lcd(TwoWire& i2c, SemaphoreHandle_t mutex) 
     : _dev_i2c(&i2c), _i2c_mutex(mutex) {
-    // 构造函数中只做配置, 不调用 init()
-    // 实际初始化由用户在 setup() 中调用 init() 完成
     configure();
 }
 
@@ -87,7 +85,6 @@ void Rootmaker_Lcd::configure(void) {
     
         _touch_instance.config(cfg);
         
-        // 将 Wire 对象传递给触摸屏驱动，使用统一的 I2C 驱动
         _touch_instance.setWire(_dev_i2c);
         
         _panel_instance.setTouch(&_touch_instance);  // Set the touch screen to the panel
@@ -97,7 +94,6 @@ void Rootmaker_Lcd::configure(void) {
 }
 
 void Rootmaker_Lcd::init(void) {
-    // 调用父类的 init() 来真正初始化硬件
     lgfx::LGFX_Device::init();
 }
 

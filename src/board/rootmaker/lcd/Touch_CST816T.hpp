@@ -35,7 +35,7 @@ namespace lgfx
       _wire = nullptr;
     }
 
-    // 设置 Wire 对象指针 (必须在 init() 之前调用)
+    // Set Wire object pointer (must be called before init())
     void setWire(TwoWire* wire) { _wire = wire; }
 
     bool init(void) override;
@@ -46,7 +46,7 @@ namespace lgfx
     uint_fast8_t getTouchRaw(touch_point_t* tp, uint_fast8_t count) override;
 
   private:
-    TwoWire* _wire;  // 使用外部传入的 Wire 对象
+    TwoWire* _wire;
 
     enum
     {

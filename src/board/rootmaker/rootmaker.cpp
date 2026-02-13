@@ -3,7 +3,6 @@
 RootMaker::RootMaker(void) 
     : _dev_i2c(0), _i2c_mutex(nullptr), _i2c_initialized(false),
       lcd(nullptr), lis2dwtr(nullptr) {
-    // 构造函数中不做硬件初始化
 }
 
 RootMaker::~RootMaker(void) {
@@ -24,21 +23,19 @@ RootMaker::~RootMaker(void) {
 void RootMaker::begin(bool LCDEnable, 
                       bool LEDEnable, 
                       bool SensorEnable, 
-                      bool ButtonEnable) {
-    // 初始化 I2C 互斥锁
+                      bool ButtonEnable,
+                      bool BatteryEnable) {
     if (_i2c_mutex == nullptr) {
         _i2c_mutex = xSemaphoreCreateMutex();
     }
 
-    // 首先初始化共享 I2C 总线
-    // 触摸屏和加速度传感器共用同一组 I2C 引脚 (41/40)
-    // 现在统一使用 Arduino Wire 作为唯一的 I2C 驱动
+    // Initialize shared I2C bus (100kHz, compatible with PY32)
     if (!_i2c_initialized) {
-        _dev_i2c.begin(I2C_SDA, I2C_SCL);
+        _dev_i2c.begin(I2C_SDA, I2C_SCL, 100000);
         _i2c_initialized = true;
     }
 
-    // 初始化 LCD (触摸屏现在使用 Wire 而不是 lgfx::i2c)
+    // Initialize LCD
     if (LCDEnable) {
         if (lcd == nullptr) {
             lcd = new Rootmaker_Lcd(_dev_i2c, _i2c_mutex);
@@ -46,12 +43,12 @@ void RootMaker::begin(bool LCDEnable,
         lcd->init();
     }
 
-    // 初始化 LED
+    // Initialize LED
     if (LEDEnable) {
         led.init();
     }
 
-    // 初始化加速度传感器 (与触摸屏共享同一个 Wire 和互斥锁)
+    // Initialize accelerometer sensor
     if (SensorEnable) {
         if (lis2dwtr == nullptr) {
             lis2dwtr = new Rootmaker_lis2dwtr(_dev_i2c, _i2c_mutex);
@@ -59,9 +56,14 @@ void RootMaker::begin(bool LCDEnable,
         lis2dwtr->init();
     }
 
-    // 初始化按钮
+    // Initialize button
     if (ButtonEnable) {
         btn.init();
+    }
+
+    // Initialize battery management module
+    if (BatteryEnable) {
+        bat.init(_dev_i2c, _i2c_mutex);
     }
 }
 

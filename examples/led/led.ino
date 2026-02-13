@@ -7,7 +7,7 @@ void setup(void)
 {
     Serial.begin(115200);
   
-    board.rootmaker.begin(false, true, false, false);
+    board.rootmaker.begin(false, true, false, false, false);
 }
 
 void loop(void)

@@ -26,12 +26,39 @@ class Rootmaker_Lcd : public lgfx::LGFX_Device {
     SemaphoreHandle_t _i2c_mutex;
   
   public:
+        /**
+         * @brief Constructor
+         * @param i2c I2C bus reference for touch controller
+         * @param mutex I2C mutex for thread-safe access
+         */
         Rootmaker_Lcd(TwoWire& i2c, SemaphoreHandle_t mutex);
-        void configure();  // 配置屏幕参数 (在构造函数中自动调用)
-        void init();       // 初始化硬件 (需要在 setup() 中手动调用)
+
+        /**
+         * @brief Configure screen parameters
+         */
+        void configure();
+
+        /**
+         * @brief Initialize hardware (needs to be called manually in setup())
+         */
+        void init();
+
+        /**
+         * @brief Clear the screen
+         */
         void clear();
+
+        /**
+         * @brief Get panel device instance
+         * @return Pointer to panel device
+         */
         lgfx::Panel_Device* panel() { return &_panel_instance; }
 
-        // 带锁的触摸读取
+        /**
+         * @brief Read touch position with I2C lock
+         * @param x Pointer to store X coordinate
+         * @param y Pointer to store Y coordinate
+         * @return true if touch detected, false otherwise
+         */
         bool getTouch(uint16_t* x, uint16_t* y);
 };

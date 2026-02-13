@@ -15,7 +15,7 @@ namespace lgfx
 
   static constexpr uint8_t CST816S_SLEEP_IN   = 0x03;
 
-  // 使用 Arduino Wire 写寄存器
+  // Write register using Arduino Wire
   bool Touch_CST816T::_write_reg(uint8_t reg, uint8_t val)
   {
     if (_wire == nullptr) {
@@ -27,7 +27,7 @@ namespace lgfx
     return (_wire->endTransmission() == 0);
   }
 
-  // 使用 Arduino Wire 写多个字节
+  // Write multiple bytes using Arduino Wire
   bool Touch_CST816T::_write_regs(uint8_t* val, size_t length)
   {
     if (_wire == nullptr) {
@@ -38,7 +38,7 @@ namespace lgfx
     return (_wire->endTransmission() == 0);
   }
 
-  // 使用 Arduino Wire 读寄存器
+  // Read register using Arduino Wire
   bool Touch_CST816T::_read_reg(uint8_t reg, uint8_t *data, size_t length)
   {
     if (_wire == nullptr) {
@@ -75,25 +75,21 @@ namespace lgfx
   {
     _inited = false;
 
-    // 触摸屏复位
+    // Touch screen reset
     if (_cfg.pin_rst >= 0)
     {
       lgfx::pinMode(_cfg.pin_rst, pin_mode_t::output);
       lgfx::gpio_lo(_cfg.pin_rst);
       lgfx::delay(10);
       lgfx::gpio_hi(_cfg.pin_rst);
-      lgfx::delay(50);  // 给触摸屏更多时间启动
+      lgfx::delay(50);  // Give touch screen more time to start
     }
 
-    // 配置中断引脚
+    // Configure interrupt pin
     if (_cfg.pin_int >= 0)
     {
       lgfx::pinMode(_cfg.pin_int, pin_mode_t::input_pullup);
     }
-
-    // 注意: 不再调用 lgfx::i2c::init()
-    // I2C 由外部 Wire 对象管理，避免驱动冲突
-    // Wire 应该在调用此 init() 之前已经初始化
 
     _inited = true;
     return true;
@@ -114,7 +110,7 @@ namespace lgfx
     if (!_inited) return;
   }
 
-  // 使用 Arduino Wire 读取触摸数据
+  // Read touch data using Arduino Wire
   size_t Touch_CST816T::_read_data(uint8_t* readdata)
   {
     if (_wire == nullptr) {

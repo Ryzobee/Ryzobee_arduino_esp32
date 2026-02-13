@@ -11,6 +11,7 @@
 #include "led/Rootmaker_led.h"
 #include "button/Rootmaker_btn.h"
 #include "lis2dwtr/Rootmaker_Lis2dwtr.h"
+#include "battery/Rootmaker_bat.h"
 
 #define SCREEN_WIDTH  240
 
@@ -27,15 +28,15 @@ class RootMaker {
     void begin(bool LCDEnable      = true, 
                bool LEDEnable      = true, 
                bool SensorEnable   = true, 
-               bool ButtonEnable   = true);
+               bool ButtonEnable   = true,
+               bool BatteryEnable  = true);
 
-    // 使用指针，在 begin() 中构造
     Rootmaker_Lcd* lcd;
     Rootmaker_led led;
     Rootmaker_btn btn;
     Rootmaker_lis2dwtr* lis2dwtr;
+    Rootmaker_bat bat;
 
-    // I2C 资源锁接口
     void lockI2C();
     void unlockI2C();
     TwoWire& getI2C() { return _dev_i2c; }

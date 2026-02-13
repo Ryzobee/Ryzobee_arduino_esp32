@@ -1,4 +1,6 @@
 # Install dependencies
+
+[中文](./README_CN.md)
 This routine relies on the Adafruit_NeoPixel library, which needs to be downloaded on the Arduino IDE
 
 # Dependencies

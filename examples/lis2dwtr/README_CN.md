@@ -1,4 +1,7 @@
 # 下载依赖库
+
+[English](./README.md)
+
 此程序依赖于Lis2dw12库，该库需要在ArduinoIDE中下载
 
 # 依赖库

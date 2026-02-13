@@ -48,7 +48,8 @@ void loop(void)
 
 | 名称 | 最低版本 | 说明 |
 |:---:|:---:|:---|
-| [arduino-esp32](https://github.com/espressif/arduino-esp32.git) | v3.0.7 | ESP32 系列 SoC 的 Arduino 核心库 |
+| [arduino-esp32](https://github.com/espressif/arduino-esp32.git) | v3.3.7 | ESP32 系列 SoC 的 Arduino 核心库 |
+|  [LovyanGFX](https://github.com/lovyan03/LovyanGFX)  | >= v1.2.19 |SPI LCD graphics library for ESP32  / ESP8266  / SAMD51 |
 | [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel) | v1.12.3 | 用于控制基于单线协议的 LED 像素和灯带 |
 | [LIS2DW12](https://github.com/stm32duino/LIS2DW12.git) | v2.1.1 | 支持 LIS2DW12 3D 加速度计的驱动库 |
 

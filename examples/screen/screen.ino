@@ -1,10 +1,8 @@
 #include "Ryzobee.h"
 
-#define CUBE_WIDTH    40
-
 Ryzobee board(RYZOBEE_ROOTMAKER);
 
-
+#define CUBE_WIDTH    40
 long randNumber_x = (SCREEN_WIDTH - CUBE_WIDTH) / 2;
 long randNumber_y = (SCREEN_WIDTH - CUBE_WIDTH) / 2;
 
@@ -14,9 +12,8 @@ void setup(void)
 
   randomSeed(analogRead(A0));
 
-  board.rootmaker.begin(true, false, false, false);  // 初始化板载硬件 (包括 LCD)
+  board.rootmaker.begin(true, false, false, false, false);
 
-  // 确保背光打开
   board.rootmaker.lcd->setBrightness(255);
 
   board.rootmaker.lcd->setTextSize((std::max(board.rootmaker.lcd->width(), board.rootmaker.lcd->height()) + 255) >> 8);
