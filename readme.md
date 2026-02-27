@@ -18,8 +18,7 @@ void setup(void)
 {
     Serial.begin(115200);
     
-    // Initialize board (LCD, Touch, LED, Accelerometer)
-    board.rootmaker.begin(true, true, true, true);
+    board.rootmaker.begin();
 }
 
 void loop(void)
@@ -48,10 +47,10 @@ Please ensure the following libraries are installed before use:
 
 | Name | Min Version | Description |
 |:---:|:---:|:---|
-| [arduino-esp32](https://github.com/espressif/arduino-esp32.git) | v3.3.7 | Arduino core for ESP32 series SoC |
+| [arduino-esp32](https://github.com/espressif/arduino-esp32.git) | >=v3.3.7 | Arduino core for ESP32 series SoC |
 |  [LovyanGFX](https://github.com/lovyan03/LovyanGFX)  | >= v1.2.19 |SPI LCD graphics library for ESP32  / ESP8266  / SAMD51 |
-| [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel) | v1.12.3 | Arduino library for controlling single-wire LED pixels and strips |
-| [LIS2DW12](https://github.com/stm32duino/LIS2DW12.git) | v2.1.1 | Arduino library for LIS2DW12 3D accelerometer |
+| [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel) | >=v1.12.3 | Arduino library for controlling single-wire LED pixels and strips |
+| [LIS2DW12](https://github.com/stm32duino/LIS2DW12.git) | >=v2.1.1 | Arduino library for LIS2DW12 3D accelerometer |
 
 ## License
 

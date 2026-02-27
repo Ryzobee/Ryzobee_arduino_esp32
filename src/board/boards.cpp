@@ -8,7 +8,7 @@ Ryzobee::Ryzobee(Ryzobee_board_t board) {
 void Ryzobee::begin(void) {
     switch (_board) {
       case RYZOBEE_ROOTMAKER: {
-        rootmaker.begin(true, true, true, true);
+        rootmaker.begin(true, true, true, true, true);
         break;
       }
       default: {

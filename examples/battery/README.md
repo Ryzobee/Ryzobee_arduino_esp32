@@ -25,3 +25,9 @@ This example demonstrates how to use the PY32 battery management module via I2C 
 - PY32 slave address: `0x73`
 
 
+
+
+
+
+
+
