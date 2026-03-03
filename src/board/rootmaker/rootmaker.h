@@ -25,7 +25,7 @@ class RootMaker {
     RootMaker(void);
     ~RootMaker(void);
 
-    void begin(bool LCDEnable      = true, 
+    void begin(bool LCDEnable      = false, 
                bool LEDEnable      = true, 
                bool SensorEnable   = true, 
                bool ButtonEnable   = true,
