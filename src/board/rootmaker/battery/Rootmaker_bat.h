@@ -125,9 +125,29 @@ public:
 
     /**
      * @brief Get remaining battery level percentage
+     * @note Uses polynomial curve fitting for accurate Li-ion discharge modeling
      * @return Battery percentage (0-100)
      */
     uint8_t getBatteryLevel(void);
+
+    /**
+     * @brief Read battery voltage with outlier-removal filter
+     * @note Sorts samples, removes top/bottom outliers, returns trimmed average
+     * @return Filtered battery voltage (unit: mV)
+     */
+    uint32_t getVoltageFiltered(void);
+
+    /**
+     * @brief Check if battery is currently charging
+     * @return true if charging, false otherwise
+     */
+    bool isCharging(void);
+
+    /**
+     * @brief Check if battery charge is complete
+     * @return true if charge complete, false otherwise
+     */
+    bool isChargeFull(void);
 
     /**
      * @brief Set battery voltage thresholds
@@ -176,4 +196,11 @@ private:
      * @brief Release I2C mutex
      */
     void unlockI2C(void);
+
+    /**
+     * @brief Convert voltage to battery percentage using polynomial curve fitting
+     * @param volt_mv Battery voltage in millivolts
+     * @return Battery percentage (0-100)
+     */
+    uint8_t voltToPercent(uint32_t volt_mv);
 };

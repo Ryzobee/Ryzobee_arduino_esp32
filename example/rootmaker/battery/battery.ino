@@ -3,6 +3,34 @@
 Ryzobee board(RYZOBEE_ROOTMAKER);
 
 static int8_t lastBatteryLevel = -1;
+static const int INFO_X = 12;
+static const int INFO_WIDTH = 216;
+static const int LINE_HEIGHT = 18;
+static const int BAR_X = 12;
+static const int BAR_Y = 145;
+static const int BAR_WIDTH = 160;
+static const int BAR_HEIGHT = 20;
+static const int BAR_INNER_X = 13;
+static const int BAR_INNER_Y = 146;
+static const int BAR_INNER_WIDTH = 158;
+static const int BAR_INNER_HEIGHT = 18;
+static const int VOLTAGE_Y = 76;
+static const int LEVEL_Y = 100;
+static const int BLINK_HINT_Y = 124;
+static const int STATUS_Y = 174;
+static const int KEY_WAKE_Y = 198;
+static const int KEY_OFF_Y = 218;
+static const int VALUE_GAP = 8;
+static const int VALUE_PADDING = 6;
+
+static int g_voltage_value_x = 0;
+static int g_voltage_value_width = 0;
+static int g_level_value_x = 0;
+static int g_level_value_width = 0;
+static int g_status_value_x = 0;
+static int g_status_value_width = 0;
+static int g_key_value_x = 0;
+static int g_key_value_width = 0;
 
 // Blinking control variables
 static bool isBlinking = false;             // Whether blinking
@@ -196,6 +224,58 @@ void updateLedOnBatteryChange(uint8_t currentLevel)
     }
 }
 
+static void clearInfoLine(int y)
+{
+    board.rootmaker.lcd->fillRect(INFO_X, y, INFO_WIDTH, LINE_HEIGHT, TFT_BLACK);
+}
+
+static void drawInfoLine(int y, const char* text, uint16_t color = TFT_WHITE)
+{
+    clearInfoLine(y);
+    board.rootmaker.lcd->setTextColor(color, TFT_BLACK);
+    board.rootmaker.lcd->drawString(text, INFO_X, y);
+}
+
+static void drawVoltageValue(const char* text)
+{
+    board.rootmaker.lcd->fillRect(g_voltage_value_x, VOLTAGE_Y, g_voltage_value_width, LINE_HEIGHT, TFT_BLACK);
+    board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
+    board.rootmaker.lcd->drawString(text, g_voltage_value_x, VOLTAGE_Y);
+}
+
+static void drawLevelValue(const char* text)
+{
+    board.rootmaker.lcd->fillRect(g_level_value_x, LEVEL_Y, g_level_value_width, LINE_HEIGHT, TFT_BLACK);
+    board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
+    board.rootmaker.lcd->drawString(text, g_level_value_x, LEVEL_Y);
+}
+
+static void drawStatusValue(const char* text, uint16_t color)
+{
+    board.rootmaker.lcd->fillRect(g_status_value_x, STATUS_Y, g_status_value_width, LINE_HEIGHT, TFT_BLACK);
+    board.rootmaker.lcd->setTextColor(color, TFT_BLACK);
+    board.rootmaker.lcd->drawString(text, g_status_value_x, STATUS_Y);
+}
+
+static void drawKeyValue(int y, const char* text)
+{
+    board.rootmaker.lcd->fillRect(g_key_value_x, y, g_key_value_width, LINE_HEIGHT, TFT_BLACK);
+    board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
+    board.rootmaker.lcd->drawString(text, g_key_value_x, y);
+}
+
+static int computeValueX(const char* label)
+{
+    return INFO_X + board.rootmaker.lcd->textWidth(label) + VALUE_GAP;
+}
+
+static int computeValueWidth(int value_x, const char* max_text)
+{
+    int available = board.rootmaker.lcd->width() - value_x - VALUE_PADDING;
+    int required = board.rootmaker.lcd->textWidth(max_text) + VALUE_PADDING;
+    return (required < available) ? required : available;
+}
+
 void setup(void)
 {
     Serial.begin(115200);
@@ -211,6 +291,22 @@ void setup(void)
     board.rootmaker.lcd->setTextSize(2);
     board.rootmaker.lcd->fillScreen(TFT_BLACK);
     board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
+
+    g_voltage_value_x = computeValueX("Voltage:");
+    g_voltage_value_width = computeValueWidth(g_voltage_value_x, "8888 mV");
+    g_level_value_x = computeValueX("Level:");
+    g_level_value_width = computeValueWidth(g_level_value_x, "100%");
+    g_status_value_x = computeValueX("Status:");
+    g_status_value_width = computeValueWidth(g_status_value_x, "Charge Complete");
+    g_key_value_x = computeValueX("Wake:");
+    g_key_value_width = computeValueWidth(g_key_value_x, "88888ms");
+
+    board.rootmaker.lcd->drawRect(BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT, TFT_WHITE);
+    board.rootmaker.lcd->drawString("Voltage:", INFO_X, VOLTAGE_Y);
+    board.rootmaker.lcd->drawString("Level:", INFO_X, LEVEL_Y);
+    board.rootmaker.lcd->drawString("Status:", INFO_X, STATUS_Y);
+    board.rootmaker.lcd->drawString("Wake:", INFO_X, KEY_WAKE_Y);
+    board.rootmaker.lcd->drawString("Off:", INFO_X, KEY_OFF_Y);
 
     if (board.rootmaker.bat.isConnected()) {
         Serial.println("PY32 battery manager connected!");
@@ -249,7 +345,7 @@ void loop(void)
     if (!board.rootmaker.bat.isConnected()) {
         Serial.println("PY32 disconnected!");
         board.rootmaker.lcd->setTextColor(TFT_RED, TFT_BLACK);
-        board.rootmaker.lcd->drawString("Disconnected!   ", 20, 80);
+        board.rootmaker.lcd->drawString("Disconnected!   ", INFO_X, VOLTAGE_Y);
         delay(100);
         return;
     }
@@ -260,15 +356,11 @@ void loop(void)
     }
     lastDisplayUpdate = currentTime;
 
-    board.rootmaker.lcd->fillRect(20, 80, 200, 150, TFT_BLACK);
-    board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
-
     uint32_t voltage = board.rootmaker.bat.getVoltage();
     Serial.printf("Battery Voltage: %ld mV\n", voltage);
     
-    char voltStr[32];
-    snprintf(voltStr, sizeof(voltStr), "Voltage: %ld mV", voltage);
-    board.rootmaker.lcd->drawString(voltStr, 20, 80);
+    char voltStr[20];
+    snprintf(voltStr, sizeof(voltStr), "%ld mV", voltage);
 
     // Read remaining battery percentage
     uint8_t level = board.rootmaker.bat.getBatteryLevel();
@@ -277,25 +369,9 @@ void loop(void)
     // Update LED color by battery level (if battery level changes, start blinking)
     updateLedOnBatteryChange(level);
     
-    char levelStr[32];
-    snprintf(levelStr, sizeof(levelStr), "Level: %d%%", level);
-    board.rootmaker.lcd->drawString(levelStr, 20, 110);
-    
-    // Display blinking state
-    if (isBlinking) {
-        board.rootmaker.lcd->setTextColor(TFT_MAGENTA, TFT_BLACK);
-        board.rootmaker.lcd->drawString("Press BTN to stop", 20, 130);
-        board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
-    }
-    
-    // Draw battery level bar
+    char levelStr[16];
+    snprintf(levelStr, sizeof(levelStr), "%d%%", level);
     int barWidth = (int)(level * 1.5);  // Maximum 150 pixels
-    board.rootmaker.lcd->drawRect(20, 155, 152, 20, TFT_WHITE);
-    if (level > 20) {
-        board.rootmaker.lcd->fillRect(21, 156, barWidth, 18, TFT_GREEN);
-    } else {
-        board.rootmaker.lcd->fillRect(21, 156, barWidth, 18, TFT_RED);
-    }
 
     // Read charging status
     ChargingStatus_t status = board.rootmaker.bat.getChargingStatus();
@@ -320,20 +396,40 @@ void loop(void)
             break;
         }
     }
-    board.rootmaker.lcd->drawString(statusStr, 20, 185);
 
     // Read key duration configuration
-    board.rootmaker.lcd->setTextColor(TFT_WHITE, TFT_BLACK);
     uint16_t wakeup_time = board.rootmaker.bat.getKeyWakeupTime();
     uint16_t shutdown_time = board.rootmaker.bat.getKeyShutdownTime();
     Serial.printf("Key Wakeup Time: %d ms\n", wakeup_time);
     Serial.printf("Key Shutdown Time: %d ms\n", shutdown_time);
     
     char keyStr[48];
-    snprintf(keyStr, sizeof(keyStr), "Wakeup: %dms", wakeup_time);
-    board.rootmaker.lcd->drawString(keyStr, 20, 210);
-    snprintf(keyStr, sizeof(keyStr), "Shutdown: %dms", shutdown_time);
-    board.rootmaker.lcd->drawString(keyStr, 20, 235);
+    board.rootmaker.lcd->startWrite();
+
+    drawVoltageValue(voltStr);
+    drawLevelValue(levelStr);
+
+    if (isBlinking) {
+        drawInfoLine(BLINK_HINT_Y, "Press BTN to stop", TFT_MAGENTA);
+    } else {
+        clearInfoLine(BLINK_HINT_Y);
+    }
+
+    board.rootmaker.lcd->fillRect(BAR_INNER_X, BAR_INNER_Y, BAR_INNER_WIDTH, BAR_INNER_HEIGHT, TFT_BLACK);
+    if (barWidth > 0) {
+        uint16_t barColor = (level > 20) ? TFT_GREEN : TFT_RED;
+        board.rootmaker.lcd->fillRect(BAR_INNER_X, BAR_INNER_Y, barWidth, BAR_INNER_HEIGHT, barColor);
+    }
+
+    drawStatusValue(statusStr, status == CHARGING_STATUS_NOT_CHARGING ? TFT_YELLOW :
+                              status == CHARGING_STATUS_CHARGING ? TFT_CYAN : TFT_GREEN);
+
+    snprintf(keyStr, sizeof(keyStr), "%dms", wakeup_time);
+    drawKeyValue(KEY_WAKE_Y, keyStr);
+    snprintf(keyStr, sizeof(keyStr), "%dms", shutdown_time);
+    drawKeyValue(KEY_OFF_Y, keyStr);
+
+    board.rootmaker.lcd->endWrite();
 
     Serial.println("--------------------");
 }
