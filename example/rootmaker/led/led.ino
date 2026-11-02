@@ -1,38 +1,34 @@
+#define BOARD_RYZOBEE_ROOTMAKER (1)
+
 #include "Ryzobee.h"
 
-Ryzobee board(RYZOBEE_ROOTMAKER);
+Ryzobee board;
 
+static uint16_t hue = 0;
+static uint32_t lastStepAt = 0;
+static const uint32_t STEP_INTERVAL_MS = 20;
 
 void setup(void)
 {
     Serial.begin(115200);
-  
-    board.rootmaker.begin(false, true, false, false, false);
+    delay(200);
+
+    board.maker.begin(true, false, false, false);
+
+    Serial.println();
+    Serial.println("RootMaker LED example");
+    Serial.println("Cycling the onboard RGB LED with the built-in HSV helper.");
 }
 
 void loop(void)
 {
-    rainbowCycle(10);
-}
+    uint32_t now = millis();
+    if (now - lastStepAt < STEP_INTERVAL_MS) {
+        delay(1);
+        return;
+    }
 
-void rainbowCycle(int wait) {
-    for (int j = 0; j < 256 * 5; j++) {
-      for (int i = 0; i < board.rootmaker.led.strip.numPixels(); i++) {
-        board.rootmaker.led.strip.setPixelColor(i, Wheel(((i * 256 / board.rootmaker.led.strip.numPixels()) + j) & 255));
-      }
-      board.rootmaker.led.strip.show();
-      delay(wait);
-    }
-  }
-  
-  uint32_t Wheel(byte wheelPos) {
-    if (wheelPos < 85) {
-      return board.rootmaker.led.strip.Color(wheelPos * 3, 255 - wheelPos * 3, 0);
-    } else if (wheelPos < 170) {
-      wheelPos -= 85;
-      return board.rootmaker.led.strip.Color(255 - wheelPos * 3, 0, wheelPos * 3);
-    } else {
-      wheelPos -= 170;
-      return board.rootmaker.led.strip.Color(0, wheelPos * 3, 255 - wheelPos * 3);
-    }
-  }
+    lastStepAt = now;
+    board.maker.led.setHSV(hue, 100, 40);
+    hue = (hue + 2) % 360;
+}

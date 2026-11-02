@@ -16,11 +16,12 @@
 
 # 运行说明
 
-- 编译并烧录 examples/btn/btn.ino
+- 编译并烧录 example/rootmaker/btn/btn.ino
 - 打开串口监视器，波特率设置为 115200
 - 按下板载按键后，可在串口中查看对应事件输出
 
 # 说明
 
 - 本例程仅启用按键模块，未启用屏幕、LED、传感器和电池模块
+- 使用 `board.maker.begin(false, false, true, false)` 选择需要启用的板载外设；屏幕通过独立的 Yoke 外设对象初始化。
 - 若串口没有输出，请优先检查开发板型号、串口波特率以及按键硬件是否正常

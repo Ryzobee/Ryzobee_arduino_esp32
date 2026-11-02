@@ -29,9 +29,9 @@ void loop(void)
 
 ## 支持的开发板
 
-| 名称 | 型号 | LCD接口 | 触摸芯片 | 其它外设 |
-|:---:|:---:|:---:|:---:|:---:|
-| RYZOBEE_ROOTMAKER | RootMaker | SPI / ST7789 | CST816T | LIS2DWTR / WS2812B / TP4054 |
+| 名称 | 型号 | 板载外设 |
+|:---:|:---:|:---:|
+| RYZOBEE_ROOTMAKER | RootMaker | LIS2DWTR / WS2812B / TP4054 |
 
 ## Arduino IDE 配置
 
@@ -48,7 +48,6 @@ void loop(void)
 | 名称 | 最低版本 | 说明 |
 |:---:|:---:|:---|
 | [arduino-esp32](https://github.com/espressif/arduino-esp32.git) | >=v3.3.7 | ESP32 系列 SoC 的 Arduino 核心库 |
-|  [LovyanGFX](https://github.com/lovyan03/LovyanGFX)  | >= v1.2.19 |SPI LCD graphics library for ESP32  / ESP8266  / SAMD51 |
 | [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel) | >=v1.12.3 | 用于控制基于单线协议的 LED 像素和灯带 |
 | [LIS2DW12](https://github.com/stm32duino/LIS2DW12.git) | >=v2.1.1 | 支持 LIS2DW12 3D 加速度计的驱动库 |
 |  [AnimatedGIF](https://github.com/bitbank2/AnimatedGIF)  | >= 2.2.0 | 流畅的播放gif动画 |

@@ -21,12 +21,13 @@ Install the following Arduino library in the Arduino IDE before building this ex
 # Usage
 
 - Install the required dependency
-- Build and upload examples/lis2dwtr/lis2dwtr.ino
+- Build and upload example/rootmaker/lis2dwtr/lis2dwtr.ino
 - Open the serial monitor at 115200 baud
 - After boot, observe the continuous X, Y, and Z acceleration output
 
 # Notes
 
 - This example only enables the sensor module; the display, LED, button, and battery modules are disabled
+- Use `board.maker.begin(false, true, false, false)` to select onboard peripherals; initialize the display through a separate Yoke peripheral object.
 - If no data appears or the readings look invalid, first verify sensor initialization, library version compatibility, and board connection status
 

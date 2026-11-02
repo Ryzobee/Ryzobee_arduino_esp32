@@ -1,6 +1,14 @@
 #pragma once
 
-#include <LovyanGFX.hpp>
+#ifdef BOARD_RYZOBEE_ROOTMAKER
+#include "board/rootmaker/rootmaker.hpp"
+#endif
 
-#include <Wire.h>
-#include "board/boards.h"
+class Ryzobee {
+  
+  public:
+  #ifdef BOARD_RYZOBEE_ROOTMAKER
+    rootmaker maker;
+  #endif
+};
+

@@ -1,3 +1,5 @@
+#define BOARD_RYZOBEE_ROOTMAKER (1)
+
 #include <Wire.h>
 #include "Ryzobee.h"
 
@@ -8,10 +10,10 @@ typedef struct {
 } i2c_scan_port_t;
 
 static const i2c_scan_port_t ports[] = {
-    {"PORT1", PORT1_SDA, PORT1_SCL},
-    {"PORT2", PORT2_SDA, PORT2_SCL},
-    {"PORT3", PORT3_SDA, PORT3_SCL},
-    {"PORT4", PORT4_SDA, PORT4_SCL},
+    {"PORT1", PORT1_PIN1, PORT1_PIN2},
+    {"PORT2", PORT2_PIN1, PORT2_PIN2},
+    {"PORT3", PORT3_PIN1, PORT3_PIN2},
+    {"PORT4", PORT4_PIN1, PORT4_PIN2},
 };
 
 static const uint8_t PORT_COUNT = sizeof(ports) / sizeof(ports[0]);
